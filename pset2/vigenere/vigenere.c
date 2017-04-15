@@ -52,7 +52,7 @@ int main (int argc, string argv[])
     // encrypt
     int text_length = strlen(plain_text);
 
-    char cipher_text[text_length];
+    char cipher_text[text_length + 1];
 
     for (int i = 0, j = 0; plain_text[i] != '\0'; i++)
     {
