@@ -1,0 +1,28 @@
+1.  stdint.h is a C header file that defines fixed-width integer data types. 
+
+2.  They allow consistency of a C-program between different environments by maintaining the
+    the same integer widths/sizes. In the case of whodunit, they make sure that bitmap
+    file headers always have the same size and, thus, consistent memory addresses.
+
+3.  BYTE is 1 byte. DWORD and LONG are both 4 bytes. WORD is 2 bytes.
+
+4.  ASCII: B & M, Decimal: 66 & 77, HEX: 42 & 4d
+
+5.  bfSize contains the byte size of the whole bitmap file while biSize contains the byte
+    size only of the BITMAPINFOHEADER data structure.
+
+6.  It indicates a top-down bitmap, the RGB color table will render with the upper-left
+    corner as its origin.
+
+7.  biBitCount
+
+8.  When fopen fails to open a given file.
+
+9.  Because we only expect one instance of the data structure being read at a time.
+
+10. 3 bytes
+
+11. fseek moves the position indicator in the current file pointer being read.
+
+12. It tells fseek to move the position indicator relative to the current position in
+    the file.
