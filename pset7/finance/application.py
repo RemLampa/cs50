@@ -96,7 +96,24 @@ def logout():
 @login_required
 def quote():
     """Get stock quote."""
-    return apology("TODO")
+    
+    # if user reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        symbol = request.form.get("symbol")
+        
+        if not symbol:
+            return apology("enter a stock symbol")
+        
+        stock_quote = lookup(symbol.upper())
+        
+        if stock_quote is None:
+            return apology("invalid stock symbol")
+        
+        return render_template("quote.html", quote=stock_quote)
+    
+    # else if user reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("quote.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -128,12 +145,15 @@ def register():
         elif password != confirm_password:
             return apology("passwords must match")
             
+        # encrypt password
         hashed_password = pwd_context.hash(password)
         
+        # create new user
         success = db.execute("INSERT INTO users(username, hash) VALUES(:username, :password)",
             username=username,
             password=hashed_password)
         
+        # redirect to login if successfully registered
         if success:
             flash('You were successfully registered! You may now log in.')
             return redirect(url_for("login"))
