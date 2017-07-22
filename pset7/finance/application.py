@@ -177,8 +177,13 @@ def login():
         # remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
-        # redirect user to home page
-        return redirect(url_for("index"))
+        # redirect user        
+        try:
+            dest_url = url_for(request.args.get("next"))
+        except:
+            dest_url = url_for("index")
+
+        return redirect(dest_url)
 
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
