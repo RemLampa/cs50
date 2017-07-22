@@ -221,19 +221,24 @@ def register():
             flash("Passwords do not match.", "danger")
             return render_template("register.html")
             
+        # check if user exists
+        rows = db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))
+        
+        if len(rows) > 0:
+            flash("Username already exists.", "danger")
+            return render_template("register.html")
+            
         # encrypt password
         hashed_password = pwd_context.hash(password)
         
         # create new user
-        success = db.execute("INSERT INTO users(username, hash) VALUES(:username, :password)",
-            username=username,
-            password=hashed_password)
+        try:
+            db.execute("INSERT INTO users(username, hash) VALUES(:username, :password)",
+                username=username,
+                password=hashed_password)
         
-        # redirect to login if successfully registered
-        if success:
-            flash("You were successfully registered! You may now log in.", "success")
-            return redirect(url_for("login"))
-        else:
+            return render_template("register.html", registered=True)
+        except:
             return apology("registration error")
         
     # else if user reached route via GET (as by clicking a link or via redirect)

@@ -5,6 +5,14 @@
 {% endblock %}
 
 {% block main %}
+    {% if registered %}
+    <div class="panel panel-success">
+        <div class="panel-body">
+            <h2>You have been successfully registered!</h2>
+            <h1 class="text-primary">You may now <a href="{{ url_for('login') }}">Log In</a></h1>
+        </div>
+    </div>
+    {% else %}
     <form action="{{ url_for('register') }}" method="post">
         <fieldset>
             <div class="form-group">
@@ -21,4 +29,5 @@
             </div>
         </fieldset>
     </form>
+    {% endif %}
 {% endblock %}
