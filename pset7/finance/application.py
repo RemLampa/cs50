@@ -126,18 +126,21 @@ def login():
 
         # ensure username was submitted
         if not request.form.get("username"):
-            return apology("must provide username")
+            flash("Please provide a username.", "danger")
+            return render_template("login.html")
 
         # ensure password was submitted
         elif not request.form.get("password"):
-            return apology("must provide password")
+            flash("Please provide a password.", "danger")
+            return render_template("login.html")
 
         # query database for username
         rows = db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))
 
         # ensure username exists and password is correct
         if len(rows) != 1 or not pwd_context.verify(request.form.get("password"), rows[0]["hash"]):
-            return apology("invalid username and/or password")
+            flash("Invalid username/password.", "danger")
+            return render_template("login.html")
 
         # remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -169,13 +172,15 @@ def quote():
         symbol = request.form.get("symbol")
         
         if not symbol:
-            return apology("enter a stock symbol")
+            flash("Please enter a stock symbol.", "danger")
+            return render_template("quote.html")
         
         stock_quote = lookup(symbol.upper())
         
         if stock_quote is None:
-            return apology("invalid stock symbol")
-        
+            flash("Invalid stock symbol.", "danger")
+            return render_template("quote.html")
+
         return render_template("quote.html", quote=stock_quote)
     
     # else if user reached route via GET (as by clicking a link or via redirect)
@@ -198,19 +203,23 @@ def register():
         
         # ensure username was submitted
         if not username:
-            return apology("must provide username")
+            flash("Please provide username.", "danger")
+            return render_template("register.html")
 
         # ensure password was submitted
         elif not password:
-            return apology("must provide password")
+            flash("Please provide a password.", "danger")
+            return render_template("register.html")
             
         # ensure password confirmation was submitted
         elif not confirm_password:
-            return apology("must confirm password")
+            flash("Please confirm your password.", "danger")
+            return render_template("register.html")
             
         # ensure passwords must match
         elif password != confirm_password:
-            return apology("passwords must match")
+            flash("Passwords do not match.", "danger")
+            return render_template("register.html")
             
         # encrypt password
         hashed_password = pwd_context.hash(password)
@@ -222,7 +231,7 @@ def register():
         
         # redirect to login if successfully registered
         if success:
-            flash('You were successfully registered! You may now log in.')
+            flash("You were successfully registered! You may now log in.", "success")
             return redirect(url_for("login"))
         else:
             return apology("registration error")
