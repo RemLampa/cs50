@@ -39,7 +39,74 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock."""
-    return apology("TODO")
+    
+    # get user's remaining funds
+    rows = db.execute("SELECT cash FROM users WHERE id = :id", id=session.get("user_id"))
+    wallet = rows[0]["cash"]
+    
+    # if user reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        symbol = request.form.get("symbol")
+        
+        # ensure stock symbol was submitted
+        if not symbol:
+            flash("Please enter a stock symbol.", "danger")
+            return render_template("buy.html", wallet=wallet)
+        
+        stock_quote = lookup(symbol.upper())
+        
+        # ensure stock symbol is valid
+        if stock_quote is None:
+            flash("Please enter a valid stock symbol.", "danger")
+            return render_template("buy.html", wallet=wallet)
+            
+        # ensure number of shares is a positive integer
+        try:
+            shares = int(request.form.get("shares"))
+            
+            if shares <= 0:
+                raise Exception()
+        except:
+            flash("Please enter valid number of shares.", "danger")
+            return render_template("buy.html", wallet=wallet)
+        
+        # get total purchase cost
+        total_cost = shares * stock_quote["price"]
+        
+        # ensure funds are sufficient
+        if total_cost > wallet:
+            flash("You have insufficient funds.", "danger")
+            return render_template("buy.html", wallet=wallet)
+        
+        # find stock under user's account
+        rows = db.execute("SELECT * FROM stocks WHERE symbol = :symbol AND owner_id = :owner_id",
+            symbol=stock_quote["symbol"],
+            owner_id=session.get("user_id"))
+        
+        # if user already has shares of purchased stock, update
+        if len(rows) == 1:
+            total_shares = rows[0]["shares"] + shares
+            db.execute("UPDATE stocks SET shares = :total_shares WHERE id = :id",
+                total_shares=total_shares,
+                id=rows[0]["id"])
+        # else, add stock in user's account
+        else:
+            db.execute("INSERT INTO stocks(symbol, owner_id, shares) VALUES(:symbol, :owner_id, :shares)",
+                symbol=stock_quote["symbol"],
+                owner_id=session.get("user_id"),
+                shares=shares)
+        
+        # subtract purchase cost from wallet
+        wallet = wallet - total_cost
+        
+        # update user wallet in database
+        rows = db.execute("UPDATE users SET cash = :wallet WHERE id = :id", wallet=wallet, id=session.get("user_id"))
+        
+        return render_template("buy.html", quote=stock_quote, shares=shares, cost=total_cost, wallet=wallet)
+    
+    # else if user reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("buy.html", wallet=wallet)
 
 @app.route("/history")
 @login_required

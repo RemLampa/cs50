@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Buy
+{% endblock %}
+
+{% block main %}
+    <form action="{{ url_for('buy') }}" method="post">
+        <fieldset>
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Stock Symbol" type="text"/>
+            </div>
+            <div class="form-group">
+                <input class="form-control" name="shares" placeholder="Number of Shares" type="text"/>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-default" type="submit">Buy</button>
+            </div>
+        </fieldset>
+    </form>
+    
+    {% if quote and shares and cost %}
+        <div class="panel panel-success">
+            <div class="panel-heading">Buy Transaction Success</div>
+            <div class="panel-body">
+                <h4>You successfully bought {{ shares }} shares of {{ quote.symbol }} at {{ quote.price|usd }} per share.</h4>
+                <h2>Total Transaction Cost:</h2>
+                <h1 class="text-primary">{{ cost|usd }}</h1>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div class="panel panel-info">
+        <div class="panel-heading">Your Wallet</div>
+        <div class="panel-body">
+            <h2>Total Funds Remaining:</h2>
+            <h1 class="text-primary">{{ wallet|usd }}</h1>
+        </div>
+    </div>
+{% endblock %}
