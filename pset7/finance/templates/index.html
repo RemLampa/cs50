@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+    <div class="panel panel-info">
+        <div class="panel-heading">Your Stocks</div>
+        <div class="panel-body">
+            {% if stocks %}
+                <table class="table table-bordered table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>Stock</th>
+                            <th>Company</th>
+                            <th>Shares</th>
+                            <th>Stock Price</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4"><h2 class="text-success">Total Stocks Value</h2></td>
+                            <td><h2 class="text-success">{{ total_value|usd }}</h2></td>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                    {% for stock in stocks %}
+                        <tr>
+                            <td>{{ stock.symbol }}</td>
+                            <td>{{ stock.name }}</td>
+                            <td>{{ stock.shares }}</td>
+                            <td>{{ stock.price|usd }}</td>
+                            <td>{{ stock.value|usd }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <h1 class="text-warning">You currently own no stocks.</h1>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="panel panel-info">
+        <div class="panel-heading">Your Wallet</div>
+        <div class="panel-body">
+            <h2>Total Funds Remaining:</h2>
+            <h1 class="text-primary">{{ wallet|usd }}</h1>
+        </div>
+    </div>
+    
+    <div class="panel panel-info">
+        <div class="panel-body">
+            <h2>Total Portfolio Value:</h2>
+            <h1 class="text-primary">{{ portfolio_value|usd }}</h1>
+        </div>
+    </div>
+{% endblock %}

@@ -33,7 +33,39 @@ db = SQL("sqlite:///finance.db")
 @app.route("/")
 @login_required
 def index():
-    return apology("TODO")
+    """User Dashboard"""
+    
+    # get user's remaining funds
+    rows = db.execute("SELECT cash FROM users WHERE id = :id", id=session.get("user_id"))
+    wallet = rows[0]["cash"]
+    
+    # get user's stocks
+    rows = db.execute("SELECT symbol, shares FROM stocks WHERE owner_id = :owner_id ORDER BY symbol ASC",
+        owner_id=session.get("user_id"))
+    
+    total_value = 0
+    
+    if len(rows) > 0:
+        stocks = []
+        for row in rows:
+            stock = lookup(row["symbol"])
+            
+            value = row["shares"] * stock["price"]
+            total_value = total_value + value
+            
+            stocks.append({
+                "symbol": row["symbol"],
+                "name": stock["name"],
+                "shares": row["shares"],
+                "price": stock["price"],
+                "value": value
+            })
+    else:
+        stocks = None
+    
+    portfolio_value = wallet + total_value
+    
+    return render_template("index.html", wallet=wallet, stocks=stocks, total_value=total_value, portfolio_value=portfolio_value)
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
