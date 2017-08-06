@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sell
+{% endblock %}
+
+{% block main %}
+    <div class="panel panel-info">
+        <div class="panel-heading">Your Stocks</div>
+        <div class="panel-body">
+            {% if stocks %}
+                <table class="table table-bordered table-condensed table-striped">
+                    <form action="{{ url_for('sell') }}" method="post">
+                        <thead>
+                            <tr>
+                                <th>Stock</th>
+                                <th>Company</th>
+                                <th>Shares</th>
+                                <th>Stock Price</th>
+                                <th>Value</th>
+                                <th>Shares to Sell</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <td colspan="6">
+                                    <button class="btn btn-primary btn-lg btn-block" type="submit">Sell Stocks</button>
+                                </td>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                        {% for stock in stocks %}
+                            <tr>
+                                <td>{{ stock.symbol }}</td>
+                                <td>{{ stock.name }}</td>
+                                <td>{{ stock.shares }}</td>
+                                <td>{{ stock.price|usd }}</td>
+                                <td>{{ stock.value|usd }}</td>
+                                <td>
+                                    <input autocomplete="off"
+                                        class="form-control"
+                                        name="{{ stock.id }}"
+                                        placeholder="Shares"
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                        value="0"
+                                        />
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </form>
+                </table>
+            {% else %}
+                <h1 class="text-warning">You currently own no stocks.</h1>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="panel panel-info">
+        <div class="panel-heading">Your Wallet</div>
+        <div class="panel-body">
+            <h2>Total Funds Remaining:</h2>
+            <h1 class="text-primary">{{ wallet|usd }}</h1>
+        </div>
+    </div>
+{% endblock %}

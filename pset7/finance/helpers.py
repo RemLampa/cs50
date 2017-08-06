@@ -67,4 +67,42 @@ def lookup(symbol):
 
 def usd(value):
     """Formats value as USD."""
+    
     return "${:,.2f}".format(value)
+
+def get_stock_info(stock):
+    lookup_info = lookup(stock["symbol"])
+    
+    value = stock["shares"] * lookup_info["price"]
+    
+    stock_info = {
+        "id": stock["id"],
+        "symbol": stock["symbol"],
+        "name": lookup_info["name"],
+        "shares": stock["shares"],
+        "price": lookup_info["price"],
+        "value": value
+    }
+    
+    return stock_info
+
+def get_stocks(db, user_id):
+    """Retrieves list of user's stocks"""
+    
+    rows = db.execute("SELECT id, symbol, shares FROM stocks WHERE owner_id = :owner_id ORDER BY symbol ASC",
+        owner_id=user_id)
+    
+    if len(rows) > 0:
+        stocks = []
+        for row in rows:
+            # don't show stocks with 0 shares
+            if row["shares"] == 0:
+                continue
+            
+            stock = get_stock_info(row)
+            
+            stocks.append(stock)
+    else:
+        stocks = None
+        
+    return stocks

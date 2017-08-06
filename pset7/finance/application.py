@@ -35,33 +35,20 @@ db = SQL("sqlite:///finance.db")
 def index():
     """User Dashboard"""
     
+    # get user_id
+    user_id = session.get("user_id")
+    
     # get user's remaining funds
-    rows = db.execute("SELECT cash FROM users WHERE id = :id", id=session.get("user_id"))
+    rows = db.execute("SELECT cash FROM users WHERE id = :id", id=user_id)
     wallet = rows[0]["cash"]
     
-    # get user's stocks
-    rows = db.execute("SELECT symbol, shares FROM stocks WHERE owner_id = :owner_id ORDER BY symbol ASC",
-        owner_id=session.get("user_id"))
+    stocks = get_stocks(db, user_id)
     
     total_value = 0
     
-    if len(rows) > 0:
-        stocks = []
-        for row in rows:
-            stock = lookup(row["symbol"])
-            
-            value = row["shares"] * stock["price"]
-            total_value = total_value + value
-            
-            stocks.append({
-                "symbol": row["symbol"],
-                "name": stock["name"],
-                "shares": row["shares"],
-                "price": stock["price"],
-                "value": value
-            })
-    else:
-        stocks = None
+    if stocks:
+        for stock in stocks:
+            total_value = total_value + stock["value"]
     
     portfolio_value = wallet + total_value
     
@@ -286,4 +273,75 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock."""
-    return apology("TODO")
+    
+    # get user_id and total available cash
+    user_id = session.get("user_id")
+    wallet = db.execute("SELECT cash FROM users WHERE id = :id", id=user_id)[0]["cash"]
+    
+    if request.method == "GET":
+        stocks = get_stocks(db, user_id)
+        
+        return render_template("sell.html", stocks=stocks, wallet=wallet)
+
+    if request.method == "POST":
+        sell_form = request.form
+        
+        # flag to track if a sale has occured
+        sale_occured = False
+        
+        for item in sell_form.items():
+            stocks = get_stocks(db, user_id)
+            
+            stock_id = item[0]
+            stock_query = db.execute("SELECT id, symbol, shares FROM stocks WHERE id = :stock_id", stock_id=stock_id)[0]
+            stock = get_stock_info(stock_query)
+            
+            # ensure number of shares is not negative
+            try:
+                shares_to_sell = int(item[1])
+                
+                if shares_to_sell < 0:
+                    raise Exception()
+            except:
+                flash("Please enter valid number of shares for " + stock["symbol"] + ".", "danger")
+                continue
+                
+            # no sale here
+            if shares_to_sell == 0:
+                continue
+
+            # ensure user has enough number of shares
+            if stock["shares"] < shares_to_sell:
+                flash("You have entered a number greater than your actual shares for " + stock["symbol"] + ".", "danger")
+                continue
+            
+            # update number of shares of the stock
+            stock["shares"] = stock["shares"] - shares_to_sell
+            query = db.execute("UPDATE stocks SET shares = :shares WHERE id = :stock_id", shares=stock["shares"], stock_id=stock_id)
+                
+            # update user wallet in database
+            sale_value = shares_to_sell * stock["price"]
+            wallet = wallet + sale_value
+            query = db.execute("UPDATE users SET cash = :wallet WHERE id = :id", wallet=wallet, id=user_id)
+            
+            # sale successful, update flag
+            sale_occured = True
+
+            share_text = "share" if shares_to_sell ==1 else "shares"
+
+            flash("Successfully sold "
+                + str(shares_to_sell)
+                + " " + share_text + " of "
+                + stock["symbol"]
+                + " for "
+                + str(usd(sale_value))
+                + ".",
+                "success")
+        
+        if sale_occured:
+            # get updated stock list
+            stocks = get_stocks(db, user_id)
+        else:
+            flash("Please enter the number of shares of the stock/s you want to sell.", "danger")
+            
+        return render_template("sell.html", stocks=stocks, wallet=wallet)
