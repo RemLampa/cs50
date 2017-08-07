@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+    <div class="panel panel-info">
+        <div class="panel-heading">Your Transaction History</div>
+        <div class="panel-body">
+            {% if logs %}
+                <table class="table table-bordered table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date/Time</th>
+                            <th>Stock</th>
+                            <th>Shares</th>
+                            <th>Price</th>
+                            <th>Value</th>
+                            <th>Transaction</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for log in logs %}
+                        <tr>
+                            <td>{{ log.timestamp }}</td>
+                            <td>{{ log.stock }}</td>
+                            <td>{{ log.shares }}</td>
+                            <td>{{ log.price|usd }}</td>
+                            <td>{{ log.value|usd }}</td>
+                            <td>{{ log.transaction_type }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <h1 class="text-warning">You have not made any transaction yet.</h1>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

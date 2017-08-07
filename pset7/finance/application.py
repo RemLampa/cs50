@@ -59,6 +59,9 @@ def index():
 def buy():
     """Buy shares of stock."""
     
+    # get user id
+    user_id = session.get("user_id")
+    
     # get user's remaining funds
     rows = db.execute("SELECT cash FROM users WHERE id = :id", id=session.get("user_id"))
     wallet = rows[0]["cash"]
@@ -100,7 +103,7 @@ def buy():
         # find stock under user's account
         rows = db.execute("SELECT * FROM stocks WHERE symbol = :symbol AND owner_id = :owner_id",
             symbol=stock_quote["symbol"],
-            owner_id=session.get("user_id"))
+            owner_id=user_id)
         
         # if user already has shares of purchased stock, update
         if len(rows) == 1:
@@ -112,14 +115,26 @@ def buy():
         else:
             db.execute("INSERT INTO stocks(symbol, owner_id, shares) VALUES(:symbol, :owner_id, :shares)",
                 symbol=stock_quote["symbol"],
-                owner_id=session.get("user_id"),
+                owner_id=user_id,
                 shares=shares)
         
         # subtract purchase cost from wallet
         wallet = wallet - total_cost
         
         # update user wallet in database
-        rows = db.execute("UPDATE users SET cash = :wallet WHERE id = :id", wallet=wallet, id=session.get("user_id"))
+        rows = db.execute("UPDATE users SET cash = :wallet WHERE id = :id", wallet=wallet, id=user_id)
+        
+        # insert into transaction history
+        rows = db.execute("""
+            INSERT INTO logs(user_id, stock, shares, price, value, transaction_type)
+            VALUES(:user_id, :stock, :shares, :price, :value, :transaction)
+            """,
+            user_id=user_id,
+            stock=stock_quote["symbol"],
+            shares=shares,
+            price=stock_quote["price"],
+            value=total_cost,
+            transaction="buy")
         
         return render_template("buy.html", quote=stock_quote, shares=shares, cost=total_cost, wallet=wallet)
     
@@ -131,7 +146,12 @@ def buy():
 @login_required
 def history():
     """Show history of transactions."""
-    return apology("TODO")
+    
+    user_id = session.get("user_id")
+    
+    logs = db.execute("SELECT * FROM logs WHERE user_id = :user_id ORDER BY timestamp DESC", user_id=user_id)
+    
+    return render_template("history.html", logs=logs)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -323,6 +343,19 @@ def sell():
             sale_value = shares_to_sell * stock["price"]
             wallet = wallet + sale_value
             query = db.execute("UPDATE users SET cash = :wallet WHERE id = :id", wallet=wallet, id=user_id)
+            
+            # insert into transaction history
+            rows = db.execute("""
+                INSERT INTO logs(user_id, stock, shares, price, value, transaction_type)
+                VALUES(:user_id, :stock, :shares, :price, :value, :transaction)
+                """,
+                user_id=user_id,
+                stock=stock["symbol"],
+                shares=shares_to_sell,
+                price=stock["price"],
+                value=sale_value,
+                transaction="sell")
+
             
             # sale successful, update flag
             sale_occured = True
