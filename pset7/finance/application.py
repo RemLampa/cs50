@@ -169,7 +169,7 @@ def login():
             return render_template("login.html")
 
         # ensure password was submitted
-        elif not request.form.get("password"):
+        if not request.form.get("password"):
             flash("Please provide a password.", "danger")
             return render_template("login.html")
 
@@ -251,17 +251,17 @@ def register():
             return render_template("register.html")
 
         # ensure password was submitted
-        elif not password:
+        if not password:
             flash("Please provide a password.", "danger")
             return render_template("register.html")
             
         # ensure password confirmation was submitted
-        elif not confirm_password:
+        if not confirm_password:
             flash("Please confirm your password.", "danger")
             return render_template("register.html")
             
         # ensure passwords must match
-        elif password != confirm_password:
+        if password != confirm_password:
             flash("Passwords do not match.", "danger")
             return render_template("register.html")
             
@@ -378,3 +378,58 @@ def sell():
             flash("Please enter the number of shares of the stock/s you want to sell.", "danger")
             
         return render_template("sell.html", stocks=stocks, wallet=wallet)
+        
+@app.route("/password", methods=["GET", "POST"])
+@login_required
+def password():
+    """Change password"""
+
+    # if user reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        old_password = request.form.get("old-password")
+        new_password = request.form.get("new-password")
+        confirm_password = request.form.get("confirm-password")
+        
+        # ensure old_password was submitted
+        if not old_password:
+            flash("Please enter your old password.", "danger")
+            return render_template("password.html")
+            
+        user_id = session.get("user_id")
+        rows = db.execute("SELECT hash FROM users WHERE id = :user_id", user_id=user_id)
+        # ensure old password is the same as in database
+        if not pwd_context.verify(old_password, rows[0]["hash"]):
+            flash("The old password you entered is invalid.", "danger")
+            return render_template("password.html")
+
+        # ensure new password was submitted
+        if not new_password:
+            flash("Please provide a new password.", "danger")
+            return render_template("password.html")
+            
+        # ensure password confirmation was submitted
+        if not confirm_password:
+            flash("Please confirm your password.", "danger")
+            return render_template("password.html")
+            
+        # ensure passwords must match
+        if new_password != confirm_password:
+            flash("New passwords do not match.", "danger")
+            return render_template("password.html")
+
+        # encrypt new password
+        hashed_password = pwd_context.hash(new_password)
+        
+        # update the password in database
+        try:
+            db.execute("UPDATE users SET hash = :hashed_password WHERE id = :user_id",
+                hashed_password=hashed_password,
+                user_id=user_id)
+        
+            return render_template("password.html", success=True)
+        except:
+            return apology("change password error")
+        
+    # else if user reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("password.html")
