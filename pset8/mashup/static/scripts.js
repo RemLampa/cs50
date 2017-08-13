@@ -56,6 +56,11 @@ $(function() {
     // configure UI once Google Map is idle (i.e., loaded)
     google.maps.event.addListenerOnce(map, "idle", configure);
 
+    // hide marker info when user clicks on map
+    map.addListener("click", function() {
+        info.close();
+    });
+    
 });
 
 /**
@@ -63,7 +68,42 @@ $(function() {
  */
 function addMarker(place)
 {
-    // TODO
+    var placeLatLng = new google.maps.LatLng(place.latitude, place.longitude);
+    
+    var marker = new google.maps.Marker({
+        position: placeLatLng,
+        title: place.place_name
+    });
+    
+    var marker_info = '<div class="list-group">'
+    
+    // fetch articles for current postal code
+    $.getJSON(Flask.url_for('articles'), { geo: place.postal_code })
+    .done(function(data, textStatus, jqXHR) {
+        // create a link for each article
+        data.map(function(article) {
+            var article_info = '<a class="list-group-item list-group-item-info" target="_blank" href="';
+            article_info += article.link + '">';
+            article_info += article.title + '</a>';
+            
+            marker_info += article_info;
+        });
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+
+        // log error to browser's console
+        console.log(errorThrown.toString());
+    });
+    
+    marker_info += '</div>';
+    
+    // show marker information when clicked
+    marker.addListener('click', function() {
+       showInfo(this, marker_info); 
+    });
+    
+    // add marker on map
+    marker.setMap(map);
 }
 
 /**
