@@ -32,9 +32,24 @@ def index():
 @app.route("/articles")
 def articles():
     """Look up articles for geo."""
+    
+    geo = request.args.get("geo")
+    
+    articles = []
+
+    if not geo:
+        raise RuntimeError("geo required")
+
+    if not re.search("^\d*$", geo):
+        raise RuntimeError("invalid geo")
+        
+    try:
+        articles = lookup(geo)
+    except:
+        raise RuntimeError("an error occurred")
 
     # TODO
-    return jsonify([])
+    return jsonify(articles)
 
 @app.route("/search")
 def search():
