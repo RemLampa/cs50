@@ -68,11 +68,21 @@ $(function() {
  */
 function addMarker(place)
 {
+    // initialize marker coordinates
     var placeLatLng = new google.maps.LatLng(place.latitude, place.longitude);
     
+    // customize marker icon
+    var markerIcon = {
+       labelOrigin: new google.maps.Point(16, 40),
+       url: "http://maps.google.com/mapfiles/ms/micons/blue-pushpin.png"
+    };
+    
+    // create marker
     var marker = new google.maps.Marker({
         position: placeLatLng,
-        title: place.place_name
+        title: place.place_name,
+        label: place.place_name,
+        icon: markerIcon
     });
     
     var marker_info = '<div class="list-group">'
