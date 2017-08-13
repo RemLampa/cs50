@@ -48,15 +48,101 @@ def articles():
     except:
         raise RuntimeError("an error occurred")
 
-    # TODO
     return jsonify(articles)
 
 @app.route("/search")
 def search():
     """Search for places that match query."""
 
-    # TODO
-    return jsonify([])
+    q = request.args.get("q")
+    
+    if not q:
+        raise RuntimeError("q string required")
+    
+    try:
+        results = []
+        
+        # postal code
+        if re.search("^\d*$", q):
+            results = db.execute("SELECT * FROM places WHERE postal_code LIKE :q LIMIT 10", q=q + "%")
+        # name of place
+        else:
+            q_array = re.split(",+|,", q)
+            
+            q_array = list(map((lambda q_item: q_item.strip() + "%"), q_array))
+            
+            q_array_length = len(q_array)
+
+            if q_array_length > 3:
+                raise RuntimeError("invalid query length")
+                
+            if q_array_length is 3:
+                results = db.execute("""
+                    SELECT
+                        *
+                    FROM
+                        places
+                    WHERE
+                        place_name LIKE :city
+                    AND
+                        (
+                            admin_name1 LIKE :state
+                        OR
+                            admin_code1 LIKE :state
+                        )
+                    AND
+                        country_code LIKE :country_code
+                    LIMIT 10
+                """,
+                city=q_array[0],
+                state=q_array[1],
+                country_code=q_array[2])
+                
+            if q_array_length is 2:
+                results = db.execute("""
+                    SELECT
+                        *
+                    FROM
+                        places
+                    WHERE
+                        place_name LIKE :city
+                    AND
+                        (
+                            admin_name1 LIKE :state
+                        OR
+                            admin_code1 LIKE :state
+                        OR
+                            country_code LIKE :country_code
+                        )
+                    LIMIT 10
+                """,
+                city=q_array[0],
+                state=q_array[1],
+                country_code=q_array[1])
+                
+            if q_array_length is 1:
+                results = db.execute("""
+                    SELECT
+                        *
+                    FROM
+                        places
+                    WHERE
+                        place_name LIKE :city
+                    OR
+                        admin_name1 LIKE :state
+                    OR
+                        admin_code1 LIKE :state
+                    OR
+                        country_code LIKE :country_code
+                    LIMIT 10
+                """,
+                city=q_array[0],
+                state=q_array[0],
+                country_code=q_array[0])
+    except:
+        raise RuntimeError("failed to fetch from database")
+
+    return jsonify(results)
 
 @app.route("/update")
 def update():
