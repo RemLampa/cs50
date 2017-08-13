@@ -112,6 +112,9 @@ function addMarker(place)
        showInfo(this, marker_info); 
     });
     
+    // add marker to global markers array
+    markers.push(marker);
+    
     // add marker on map
     marker.setMap(map);
 }
@@ -192,7 +195,13 @@ function configure()
  */
 function removeMarkers()
 {
-    // TODO
+    // iterate over all markers and remove each one
+    markers.map(function(marker) {
+        marker.setMap(null);
+    });
+    
+    // set markers as empty array
+    markers = [];
 }
 
 /**
