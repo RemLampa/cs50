@@ -9,9 +9,9 @@
 #define true 1
 #define false 0
 
-int check_match (string hash, string guess);
+int check_match(string hash, string guess);
 
-int main (int argc, string argv[])
+int main(int argc, string argv[])
 {
     // ensure that there are exactly 2 command line arguments
     if (argc != 2)
@@ -59,11 +59,17 @@ int main (int argc, string argv[])
 
                     is_x_upper = !is_x_upper;
 
-                    if (found_match) break;
+                    if (found_match)
+                    {
+                        break;
+                    }
                 }
-		// end loop for 1st character
+                // end loop for 1st character
 
-                if (found_match) break;
+                if (found_match)
+                {
+                    break;
+                }
 
                 if (is_k_upper)
                 {
@@ -77,9 +83,12 @@ int main (int argc, string argv[])
 
                 is_k_upper = !is_k_upper;
             }
-	    // end loop for 2nd character
+            // end loop for 2nd character
 
-            if (found_match) break;
+            if (found_match)
+            {
+                break;
+            }
 
             if (is_j_upper)
             {
@@ -93,9 +102,12 @@ int main (int argc, string argv[])
 
             is_j_upper = !is_j_upper;
         }
-	// end loop for 3rd character
+        // end loop for 3rd character
 
-        if (found_match) break;
+        if (found_match)
+        {
+            break;
+        }
 
         if (is_i_upper)
         {
@@ -106,7 +118,7 @@ int main (int argc, string argv[])
         {
             guess[3] = tolower(guess[3]);
         }
-        
+
         is_i_upper = !is_i_upper;
     }
     // end loop for 4th character
@@ -123,7 +135,7 @@ int main (int argc, string argv[])
     return 0;
 }
 
-int check_match (string hash, string guess)
+int check_match(string hash, string guess)
 {
     char salt[3];
 

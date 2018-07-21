@@ -6,7 +6,7 @@
 #define true 1
 #define false 0
 
-int main (int argc, string argv[])
+int main(int argc, string argv[])
 {
     int arg_is_alpha = true;
 
@@ -33,7 +33,7 @@ int main (int argc, string argv[])
         return 1;
     }
 
-    // convert cipher keyword into an array of 
+    // convert cipher keyword into an array of
     // alphabetical shift indices
     int key_length = strlen(argv[1]);
 
@@ -44,9 +44,9 @@ int main (int argc, string argv[])
         key_array[i] = toupper(argv[1][i]) - 65;
     }
 
-    // get plain text from user 
+    // get plain text from user
     printf("plaintext: ");
-    
+
     string plain_text = get_string();
 
     // encrypt
@@ -72,7 +72,10 @@ int main (int argc, string argv[])
 
         j++;
 
-        if (j >= key_length) j = 0;
+        if (j >= key_length)
+        {
+            j = 0;
+        }
     }
 
     // terminate character array with null
