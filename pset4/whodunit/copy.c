@@ -1,7 +1,5 @@
-/**
- * Copies a BMP piece by piece, just because.
- */
-       
+// Copies a BMP file
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,7 +10,7 @@ int main(int argc, char *argv[])
     // ensure proper usage
     if (argc != 3)
     {
-        fprintf(stderr, "Usage: ./copy infile outfile\n");
+        fprintf(stderr, "Usage: copy infile outfile\n");
         return 1;
     }
 
@@ -20,7 +18,7 @@ int main(int argc, char *argv[])
     char *infile = argv[1];
     char *outfile = argv[2];
 
-    // open input file 
+    // open input file
     FILE *inptr = fopen(infile, "r");
     if (inptr == NULL)
     {
@@ -46,7 +44,7 @@ int main(int argc, char *argv[])
     fread(&bi, sizeof(BITMAPINFOHEADER), 1, inptr);
 
     // ensure infile is (likely) a 24-bit uncompressed BMP 4.0
-    if (bf.bfType != 0x4d42 || bf.bfOffBits != 54 || bi.biSize != 40 || 
+    if (bf.bfType != 0x4d42 || bf.bfOffBits != 54 || bi.biSize != 40 ||
         bi.biBitCount != 24 || bi.biCompression != 0)
     {
         fclose(outptr);
@@ -62,7 +60,7 @@ int main(int argc, char *argv[])
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
     // determine padding for scanlines
-    int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    int padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
     // iterate over infile's scanlines
     for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
