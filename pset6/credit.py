@@ -13,12 +13,16 @@ first_digit = 0
 first_two_digits = 0
 digits = 0
 
+# Parse the credit card number by working backwards
+# Start from the ones digit and work our way up
 while card_number >= 1:
     remainder = card_number % 10
 
+    # Get first 2 digits
     if card_number >= 10 and card_number < 100:
         first_two_digits = card_number
 
+    # remaining digit is the first digit
     if card_number < 10:
         first_digit = card_number
 
@@ -36,10 +40,11 @@ while card_number >= 1:
 
     digits += 1
 
-if total%10 == 0:
+# check validity of cc number
+if total % 10 == 0:
     # American Express
     if digits == 15 and (first_two_digits == 34 or first_two_digits == 37):
-        print('AMEX');
+        print('AMEX')
     # MasterCard
     elif digits == 16 and first_two_digits >= 51 and first_two_digits <= 55:
         print('MASTERCARD')
