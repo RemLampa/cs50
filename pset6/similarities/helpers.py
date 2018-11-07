@@ -32,7 +32,7 @@ def optimal_cell_distance(deletion_steps, insertion_steps, substitution_steps, l
 def distances(a, b):
     """Calculate edit distance from a to b"""
 
-    distance_matrix = [[0] * (len(b) + 1) for i in range(len(a) + 1)]
+    distance_matrix = [[(0, None)] * (len(b) + 1) for i in range(len(a) + 1)]
 
     # Solve for first column
     for i in range(1, len(a) + 1):
@@ -48,8 +48,7 @@ def distances(a, b):
             previous_deletion_steps = distance_matrix[i-1][j][0]
             previous_insertion_steps = distance_matrix[i][j-1][0]
 
-            # previous steps is 0 if at cell (1, 1)
-            previous_substitution_steps = 0 if i == 1 and j == 1 else distance_matrix[i-1][j-1][0]
+            previous_substitution_steps = distance_matrix[i-1][j-1][0]
 
             last_char_a = a[i-1]
             last_char_b = b[j-1]
