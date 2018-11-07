@@ -76,3 +76,7 @@ span.substituted
 {
     background-color: #ff0;
 }
+
+.form-control {
+    text-align: center;
+}
