@@ -9,7 +9,7 @@ int main(void)
     do
     {
         printf("Height: ");
-        n = get_int();
+        n = get_int("");
     }
     // limit the height
     while (n < 0 || n > 23);
